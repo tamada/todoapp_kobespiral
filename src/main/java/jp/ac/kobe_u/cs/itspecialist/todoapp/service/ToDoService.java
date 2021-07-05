@@ -2,6 +2,7 @@ package jp.ac.kobe_u.cs.itspecialist.todoapp.service;
 
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,10 @@ public class ToDoService {
     public ToDo createToDo(String mid, ToDoForm form) {
         mService.getMember(mid); //実在メンバーか確認
         ToDo todo = form.toEntity();
+        if(!todo.isValidDueDate()) {
+            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION,
+                    todo.getDueAt() + ": should be after created at");
+        }
         todo.setMid(mid);
         return tRepo.save(todo);
     }
@@ -76,6 +81,25 @@ public class ToDoService {
         return tRepo.findByDone(true);
     }
 
+    /**
+     * 〆切を更新する．
+     * @param mid
+     * @param seq
+     * @param due
+     */
+    public ToDo updateDueDate(String mid, Long seq, Date due) {
+        ToDo todo = getToDo(seq);
+        if (!Objects.equals(mid, todo.getMid())) {
+            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION, mid
+                    + ": Cannot done other's todo of " + todo.getMid());
+        }
+        if(due != null && due.before(todo.getCreatedAt())) {
+            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION,
+                    due + ": should be after created at.");
+        }
+        todo.setDueAt(due);
+        return tRepo.save(todo);
+    }
 
     /**
      * ToDoを完了する
@@ -87,8 +111,8 @@ public class ToDoService {
         ToDo todo = getToDo(seq);
         //Doneの認可を確認する．他人のToDoを閉めたらダメ．
         if (!mid.equals(todo.getMid())) {
-            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION, mid 
-            + ": Cannot done other's todo of " + todo.getMid());
+            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION, mid
+                    + ": Cannot done other's todo of " + todo.getMid());
         }
         todo.setDone(true);
         todo.setDoneAt(new Date());
