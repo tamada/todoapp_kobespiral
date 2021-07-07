@@ -17,11 +17,16 @@ public class ToDoForm {
     @Size(min=1, max=64)
     String title; //ToDo題目
 
+    @NotBlank
+    @Size(min=6, max=8)
+    String background; // 背景色
+
     public ToDo toEntity() {
         ToDo t = new ToDo();
         t.setTitle(title);
         t.setCreatedAt(new Date());
         t.setDone(false);
+        t.setBackground(background);
         return t;
     }
 }

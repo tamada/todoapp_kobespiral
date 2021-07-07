@@ -31,4 +31,5 @@ public class ToDo {
     Date createdAt;   //作成日時
     @Temporal(TemporalType.TIMESTAMP)
     Date doneAt;      //完了日時
+    String background; //背景色
 }
