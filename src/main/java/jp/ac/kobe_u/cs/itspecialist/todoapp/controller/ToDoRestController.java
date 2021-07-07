@@ -49,13 +49,13 @@ public class ToDoRestController {
     /* --- R: ToDoを取得する (リスト) --- */
     @GetMapping("/{mid}/todos")
     List<ToDo> getToDoList(@PathVariable String mid) {
-        return todoService.getToDoList(mid);
+        return todoService.getToDoAllList(mid);
     }
 
     /* --- R: Doneを取得する (リスト) --- */
     @GetMapping("/{mid}/dones")
     List<ToDo> getDoneList(@PathVariable String mid) {
-        return todoService.getDoneList(mid);
+        return todoService.getDoneAllList(mid);
     }
 
     /* --- U: ToDoを完了する --- */

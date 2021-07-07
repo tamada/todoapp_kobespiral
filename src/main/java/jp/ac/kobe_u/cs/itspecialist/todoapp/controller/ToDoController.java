@@ -3,6 +3,8 @@ package jp.ac.kobe_u.cs.itspecialist.todoapp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -54,13 +56,14 @@ public class ToDoController {
      * ユーザのToDoリストのページ
      */
     @GetMapping("/{mid}/todos")
-    String showToDoList(@PathVariable String mid, @ModelAttribute(name = "ToDoForm") ToDoForm form, Model model) {
+    String showToDoList(@PathVariable String mid, @ModelAttribute(name = "ToDoForm") ToDoForm form,
+                        Model model, Pageable pageable) {
         Member m = mService.getMember(mid);
         model.addAttribute("member", m);
         model.addAttribute("ToDoForm", form);
-        List<ToDo> todos = tService.getToDoList(mid);
+        Page<ToDo> todos = tService.getToDoList(mid, pageable);
         model.addAttribute("todos", todos);
-        List<ToDo> dones = tService.getDoneList(mid);
+        Page<ToDo> dones = tService.getDoneList(mid, pageable);
         model.addAttribute("dones", dones);
         return "list";
     }
@@ -69,12 +72,12 @@ public class ToDoController {
      * 全員のToDoリストのページ
      */
     @GetMapping("/{mid}/todos/all")
-    String showAllToDoList(@PathVariable String mid, Model model) {
+    String showAllToDoList(@PathVariable String mid, Model model, Pageable pageable) {
         Member m = mService.getMember(mid);
         model.addAttribute("member", m);
-        List<ToDo> todos = tService.getToDoList();
+        Page<ToDo> todos = tService.getToDoList(pageable);
         model.addAttribute("todos", todos);
-        List<ToDo> dones = tService.getDoneList();
+        Page<ToDo> dones = tService.getDoneList(pageable);
         model.addAttribute("dones", dones);
         return "alllist";
     }
@@ -85,10 +88,9 @@ public class ToDoController {
     @PostMapping("/{mid}/todos")
     String createToDo(@PathVariable String mid, @Validated @ModelAttribute(name = "ToDoForm") ToDoForm form,
             BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            return showToDoList(mid, form, model);
+        if (!bindingResult.hasErrors()) {
+            tService.createToDo(mid, form);
         }
-        tService.createToDo(mid, form);
         return "redirect:/" + mid + "/todos";
     }
 
