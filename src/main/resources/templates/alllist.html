@@ -15,35 +15,114 @@
     <h2>ToDo</h2>
     <table border="1">
         <tr>
-            <th>#</th>
-            <th>タイトル</th>
-            <th>作成者</th>
-            <th>作成日時</th>
+            <th>
+                #
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'seq'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'seq'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                タイトル
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'title'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'title'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                作成者
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'mid'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'mid'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                作成日時
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'created_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'created_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                期日
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'due_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'due_at'}, order=${'desc'})}">↑</a>
+            </th>
         </tr>
         <tr th:each="todo: ${todos}">
-            <td>[[${todo.seq}]]</td>
+            <td th:style="'background-color: ' + ${todo.background}">[[${todo.seq}]]</td>
             <td>[[${todo.title}]]</td>
             <td>[[${todo.mid}]]</td>
-            <td>[[${todo.createdAt}]]</td>
+            <td th:title="${todo.createdAt}">[[${todo.humanizeCreatedAt()}]]</td>
+            <td th:title="${todo.dueAt}">[[${todo.humanizeDueAt()}]]</td>
         </tr>
     </table>
+    <div th:fragment="paginationbar">
+        <ul>
+            <li th:class="${todos.first}? 'disabled': ''" style="display:inline">
+                <span th:if="${todos.first}">&lt;&lt;</span>
+                <a th:if="${not todos.first}" th:href="@{${url}(page=0)}">&lt;&lt;</a>
+            </li>
+            <li th:if="${todos.totalPages} > 0" th:each="i: ${#numbers.sequence(0, todos.totalPages-1)}" th:class="(${i}==${todos.number})?'active': ''" style="display:inline">
+                <span th:if="${i} == ${todos.number}" th:text="${i+1}">1</span>
+                <a th:if="${i}!=${todos.number}" th:href="@{${url}(page=${i})}">
+                    <span th:text="${i+1}">1</span>
+                </a>
+            </li>
+            <li th:class="${todos.last}? 'disabled': ''" style="display:inline">
+                <span th:if="${todos.last}">&gt;&gt;</span>
+                <a th:if="${not todos.last}" th:href="@{${url}(page=(${todos.totalPages}-1))}">&gt;&gt;</a>
+            </li>
+        </ul>
+    </div>
 
     <h2>Done</h2>
     <table border="1">
         <tr>
-            <th>#</th>
-            <th>タイトル</th>
-            <th>作成者</th>
-            <th>完了日時</th>
+            <th>
+                #
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'seq'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'seq'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                タイトル
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'title'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'title'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                作成者
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'mid'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'mid'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                期日
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'due_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'due_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                完了日時
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'done_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos/all(mid=${member.mid}, sort_by=${'done_at'}, order=${'desc'})}">↑</a>
+            </th>
         </tr>
         <tr th:each="done: ${dones}">
-            <td>[[${done.seq}]]</td>
+            <td th:style="'background-color: ' + ${done.background}">[[${done.seq}]]</td>
             <td>[[${done.title}]]</td>
             <td>[[${done.mid}]]</td>
-            <td>[[${done.doneAt}]]</td>
+            <td th:title="${done.dueAt}">[[${done.humanizeDueAt()}]]</td>
+            <td th:title="${done.doneAt}">[[${done.humanizeDoneAt()}]]</td>
         </tr>
     </table>
-
+    <div th:fragment="paginationbar">
+        <ul>
+            <li th:class="${dones.first}? 'disabled': ''" style="display:inline">
+                <span th:if="${dones.first}">&lt;&lt;</span>
+                <a th:if="${not dones.first}" th:href="@{${url}(page=0)}">&lt;&lt;</a>
+            </li>
+            <li th:if="${dones.totalPages} > 0" th:each="i: ${#numbers.sequence(0, dones.totalPages-1)}" th:class="(${i}==${dones.number})?'active': ''" style="display:inline">
+                <span th:if="${i} == ${dones.number}" th:text="${i+1}">1</span>
+                <a th:if="${i}!=${dones.number}" th:href="@{${url}(page=${i})}">
+                    <span th:text="${i+1}">1</span>
+                </a>
+            </li>
+            <li th:class="${dones.last}? 'disabled': ''" style="display:inline">
+                <span th:if="${dones.last}">&gt;&gt;</span>
+                <a th:if="${not dones.last}" th:href="@{${url}(page=(${dones.totalPages}-1))}">&gt;&gt;</a>
+            </li>
+        </ul>
+    </div>
 </body>
 
 </html>

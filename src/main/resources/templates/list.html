@@ -15,16 +15,45 @@
     <h2>ToDo</h2>
     <table border="1">
         <tr>
-            <th>#</th>
-            <th>タイトル</th>
-            <th>作成日時</th>
+            <th>
+                #
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'seq'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'seq'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                タイトル
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'title'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'title'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                作成日時
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'created_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'created_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                期日
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'desc'})}">↑</a>
+            </th>
             <th>コマンド</th>
         </tr>
         <tr th:each="todo: ${todos}">
-            <td>[[${todo.seq}]]</td>
+            <td th:style="'background-color: ' + ${todo.background}">[[${todo.seq}]]</td>
             <td>[[${todo.title}]]</td>
-            <td>[[${todo.createdAt}]]</td>
+            <td th:title="${todo.createdAt}">[[${todo.humanizeCreatedAt()}]]</td>
+            <td th:title="${todo.dueAt}">[[${todo.humanizeDueAt()}]]</td>
             <td>
+                <form th:action="@{/{mid}/todos/{seq}/due(mid=${member.mid},seq=${todo.seq})}" th:method="put" th:object="${ToDoForm}">
+                    <input type="hidden" name="title" th:value="${todo.title}" />
+                    <input type="hidden" name="background" th:value="${todo.background}" />
+                    <input type="datetime-local" name="due" th:value="${todo.getDueString()}" />
+                    <input type="submit" value="期日を設定" />
+                </form>
+                <form th:object="${ToDoForm}" th:action="@{/{mid}/todos/{seq}/background(mid=${member.mid},seq=${todo.seq})}" th:method="put">
+                    <input type="hidden" name="title" th:value="${todo.title}"/>
+                    <input type="color" name="background" th:value="${todo.background}" />
+                    <input type="submit" value="更新" />
+                </form>
                 <a th:href="@{/{mid}/todos/{seq}/done(mid=${member.mid},seq=${todo.seq})}">完了</a>
             </td>
         </tr>
@@ -32,32 +61,93 @@
             <td>
                 *
             </td>
-            <td colspan="3">
+            <td colspan="4">
                 <form role="form" th:action="@{/{mid}/todos(mid=${member.mid})}" th:object="${ToDoForm}" method="post">
                     <input type="text" required th:field="*{title}" />
+                    <input type="datetime-local" th:field="*{due}" />
+                    <input type="color" required name="background" th:value="*{background == null ? '#ffffff': background}" />
                     <input type="submit" value="新規作成" />
                     <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" style="color: red"></div>
                 </form>
             </td>
         </tr>
     </table>
+    <div th:fragment="paginationbar">
+        <ul>
+            <li th:class="${todos.first}? 'disabled': ''" style="display:inline">
+                <span th:if="${todos.first}">&lt;&lt;</span>
+                <a th:if="${not todos.first}" th:href="@{${url}(page=0)}">&lt;&lt;</a>
+            </li>
+            <li th:if="${todos.totalPages} > 0" th:each="i: ${#numbers.sequence(0, todos.totalPages-1)}" th:class="(${i}==${todos.number})?'active': ''" style="display:inline">
+                <span th:if="${i} == ${todos.number}" th:text="${i+1}">1</span>
+                <a th:if="${i}!=${todos.number}" th:href="@{${url}(page=${i})}">
+                    <span th:text="${i+1}">1</span>
+                </a>
+            </li>
+            <li th:class="${todos.last}? 'disabled': ''" style="display:inline">
+                <span th:if="${todos.last}">&gt;&gt;</span>
+                <a th:if="${not todos.last}" th:href="@{${url}(page=(${todos.totalPages}-1))}">&gt;&gt;</a>
+            </li>
+        </ul>
+    </div>
 
     <h2>Done</h2>
     <table border="1">
         <tr>
-            <th>#</th>
-            <th>タイトル</th>
-            <th>作成日時</th>
-            <th>完了日時</th>
+            <th>
+                #
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'seq'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'seq'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                タイトル
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'title'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'title'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                作成日時
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'created_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'created_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                期日
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
+                完了日時
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'done_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'done_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>コマンド</th>
         </tr>
         <tr th:each="done: ${dones}">
-            <td>[[${done.seq}]]</td>
+            <td th:style="'background-color: ' + ${done.background}">[[${done.seq}]]</td>
             <td>[[${done.title}]]</td>
-            <td>[[${done.createdAt}]]</td>
-            <td>[[${done.doneAt}]]</td>
+            <td th:title="${done.createdAt}">[[${done.humanizeCreatedAt()}]]</td>
+            <td th:title="${done.dueAt}">[[${done.humanizeDueAt()}]]</td>
+            <td th:title="${done.doneAt}">[[${done.humanizeDoneAt()}]]</td>
+            <td><a th:href="@{/{mid}/todos/{seq}/cancel(mid=${member.mid},seq=${done.seq})}">キャンセル</a></td>
         </tr>
     </table>
-
+    <div th:fragment="paginationbar">
+        <ul>
+            <li th:class="${dones.first}? 'disabled': ''" style="display:inline">
+                <span th:if="${dones.first}">&lt;&lt;</span>
+                <a th:if="${not dones.first}" th:href="@{${url}(page=0)}">&lt;&lt;</a>
+            </li>
+            <li th:if="${dones.totalPages} > 0" th:each="i: ${#numbers.sequence(0, dones.totalPages-1)}" th:class="(${i}==${dones.number})?'active': ''" style="display:inline">
+                <span th:if="${i} == ${dones.number}" th:text="${i+1}">1</span>
+                <a th:if="${i}!=${dones.number}" th:href="@{${url}(page=${i})}">
+                    <span th:text="${i+1}">1</span>
+                </a>
+            </li>
+            <li th:class="${dones.last}? 'disabled': ''" style="display:inline">
+                <span th:if="${dones.last}">&gt;&gt;</span>
+                <a th:if="${not dones.last}" th:href="@{${url}(page=(${dones.totalPages}-1))}">&gt;&gt;</a>
+            </li>
+        </ul>
+    </div>
 </body>
 
 </html>

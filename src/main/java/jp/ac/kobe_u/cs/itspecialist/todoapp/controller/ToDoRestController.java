@@ -3,6 +3,8 @@ package jp.ac.kobe_u.cs.itspecialist.todoapp.controller;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
@@ -48,14 +50,14 @@ public class ToDoRestController {
 
     /* --- R: ToDoを取得する (リスト) --- */
     @GetMapping("/{mid}/todos")
-    List<ToDo> getToDoList(@PathVariable String mid) {
-        return todoService.getToDoList(mid);
+    Page<ToDo> getToDoList(@PathVariable String mid) {
+        return todoService.getToDoList(mid, "seq", "asc", Pageable.ofSize(10));
     }
 
     /* --- R: Doneを取得する (リスト) --- */
     @GetMapping("/{mid}/dones")
-    List<ToDo> getDoneList(@PathVariable String mid) {
-        return todoService.getDoneList(mid);
+    Page<ToDo> getDoneList(@PathVariable String mid) {
+        return todoService.getDoneList(mid, "seq", "asc", Pageable.ofSize(10));
     }
 
     /* --- U: ToDoを完了する --- */
