@@ -1,10 +1,12 @@
 package jp.ac.kobe_u.cs.itspecialist.todoapp.service;
 
-import java.util.Date;
-import java.util.List;
-import java.util.Objects;
+import java.util.*;
+
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import jp.ac.kobe_u.cs.itspecialist.todoapp.dto.ToDoForm;
@@ -53,32 +55,54 @@ public class ToDoService {
      * @param mid
      * @return
      */
-    public List<ToDo> getToDoList(String mid) {
-        return tRepo.findByMidAndDone(mid, false);
+    public List<ToDo> getToDoList(String mid, String sortBy, String order) {
+        BiFunction<String, Boolean, List<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
+                (memberId, doneFlag) -> tRepo.findByMidAndDone(memberId, doneFlag));
+        return finder.apply(mid, false);
     }
     /**
      * あるメンバーのDoneリストを取得する (R)
      * @param mid
      * @return
      */
-    public List<ToDo> getDoneList(String mid) {
-        return tRepo.findByMidAndDone(mid, true);
+    public List<ToDo> getDoneList(String mid, String sortBy, String order) {
+        BiFunction<String, Boolean, List<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
+                (memberId, doneFlag) -> tRepo.findByMidAndDone(memberId, doneFlag));
+        return finder.apply(mid, true);
+    }
+
+    private final Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> midAndDoneFinder = generateMidAndDoneFinder();
+    private Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> generateMidAndDoneFinder() {
+        Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> map = new HashMap<>();
+        map.put(Pair.of("seq", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderBySeqAsc(mid, done));
+        map.put(Pair.of("seq", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderBySeqDesc(mid, done));
+        map.put(Pair.of("title", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByTitleAsc(mid, done));
+        map.put(Pair.of("title", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByTitleDesc(mid, done));
+        map.put(Pair.of("created_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByCreatedAtAsc(mid, done));
+        map.put(Pair.of("created_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByCreatedAtDesc(mid, done));
+        map.put(Pair.of("done_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtAsc(mid, done));
+        map.put(Pair.of("done_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtDesc(mid, done));
+        return map;
     }
 
     /**
      * 全員のToDoリストを取得する (R)
      * @return
      */
-    public List<ToDo> getToDoList() {
-        return tRepo.findByDone(false);
+    public List<ToDo> getToDoList(String sortBy, String order) {
+        Function<Boolean, List<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
+                (doneFlag) -> tRepo.findByDone(doneFlag));
+        return finder.apply(false);
     }
 
     /**
      * 全員のDoneリストを取得する (R)
      * @return
      */
-    public List<ToDo> getDoneList() {
-        return tRepo.findByDone(true);
+    public List<ToDo> getDoneList(String sortBy, String order) {
+        Function<Boolean, List<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
+                (doneFlag) -> tRepo.findByDone(doneFlag));
+        return finder.apply(true);
     }
 
     /**
@@ -99,6 +123,22 @@ public class ToDoService {
         }
         todo.setDueAt(due);
         return tRepo.save(todo);
+    }
+
+    private final Map<Pair<String, String>, Function<Boolean, List<ToDo>>> doneFinder = generateDoneFinder();
+    private Map<Pair<String, String>, Function<Boolean, List<ToDo>>> generateDoneFinder() {
+        Map<Pair<String, String>, Function<Boolean, List<ToDo>>> map = new HashMap<>();
+        map.put(Pair.of("seq", "asc"), (doneFlag) -> tRepo.findByDoneOrderBySeqAsc(doneFlag));
+        map.put(Pair.of("seq", "desc"), (doneFlag) -> tRepo.findByDoneOrderBySeqDesc(doneFlag));
+        map.put(Pair.of("title", "asc"), (doneFlag) -> tRepo.findByDoneOrderByTitleAsc(doneFlag));
+        map.put(Pair.of("title", "desc"), (doneFlag) -> tRepo.findByDoneOrderByTitleDesc(doneFlag));
+        map.put(Pair.of("mid", "asc"), (doneFlag) -> tRepo.findByDoneOrderByMidAsc(doneFlag));
+        map.put(Pair.of("mid", "desc"), (doneFlag) -> tRepo.findByDoneOrderByMidDesc(doneFlag));
+        map.put(Pair.of("created_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByCreatedAtAsc(doneFlag));
+        map.put(Pair.of("created_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByCreatedAtDesc(doneFlag));
+        map.put(Pair.of("done_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtAsc(doneFlag));
+        map.put(Pair.of("done_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtDesc(doneFlag));
+        return map;
     }
 
     /**
