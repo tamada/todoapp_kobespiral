@@ -5,8 +5,11 @@ import java.util.*;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
+import jp.ac.kobe_u.cs.itspecialist.todoapp.TriFunction;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.util.Pair;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import jp.ac.kobe_u.cs.itspecialist.todoapp.dto.ToDoForm;
@@ -50,40 +53,49 @@ public class ToDoService {
         return todo;
     }
 
+    public Page<ToDo> getToDoAllList(String mid, Pageable pageable) {
+        return tRepo.findByMidAndDone(mid, false, pageable);
+    }
+
     /**
      * あるメンバーのToDoリストを取得する (R)
      * @param mid
      * @return
      */
-    public List<ToDo> getToDoList(String mid, String sortBy, String order) {
-        BiFunction<String, Boolean, List<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
-                (memberId, doneFlag) -> tRepo.findByMidAndDone(memberId, doneFlag));
-        return finder.apply(mid, false);
+    public Page<ToDo> getToDoList(String mid, String sortBy, String order, Pageable pageable) {
+        TriFunction<String, Boolean, Pageable, Page<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
+                (memberId, doneFlag, pageable2) -> tRepo.findByMidAndDone(memberId, doneFlag, pageable2));
+        return finder.apply(mid, false, pageable);
     }
+
+    public Page<ToDo> getDoneAllList(String mid, Pageable pageable) {
+        return tRepo.findByMidAndDone(mid, true, pageable);
+    }
+
     /**
      * あるメンバーのDoneリストを取得する (R)
      * @param mid
      * @return
      */
-    public List<ToDo> getDoneList(String mid, String sortBy, String order) {
-        BiFunction<String, Boolean, List<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
-                (memberId, doneFlag) -> tRepo.findByMidAndDone(memberId, doneFlag));
-        return finder.apply(mid, true);
+    public Page<ToDo> getDoneList(String mid, String sortBy, String order, Pageable pageable) {
+        TriFunction<String, Boolean, Pageable, Page<ToDo>> finder = midAndDoneFinder.getOrDefault(Pair.of(sortBy, order),
+                (memberId, doneFlag, pageable2) -> tRepo.findByMidAndDone(memberId, doneFlag, pageable2));
+        return finder.apply(mid, true, pageable);
     }
 
-    private final Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> midAndDoneFinder = generateMidAndDoneFinder();
-    private Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> generateMidAndDoneFinder() {
-        Map<Pair<String, String>, BiFunction<String, Boolean, List<ToDo>>> map = new HashMap<>();
-        map.put(Pair.of("seq", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderBySeqAsc(mid, done));
-        map.put(Pair.of("seq", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderBySeqDesc(mid, done));
-        map.put(Pair.of("title", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByTitleAsc(mid, done));
-        map.put(Pair.of("title", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByTitleDesc(mid, done));
-        map.put(Pair.of("created_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByCreatedAtAsc(mid, done));
-        map.put(Pair.of("created_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByCreatedAtDesc(mid, done));
-        map.put(Pair.of("done_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtAsc(mid, done));
-        map.put(Pair.of("done_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtDesc(mid, done));
-        map.put(Pair.of("due_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDueAtAsc(mid, done));
-        map.put(Pair.of("due_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDueAtDesc(mid, done));
+    private final Map<Pair<String, String>, TriFunction<String, Boolean, Pageable, Page<ToDo>>> midAndDoneFinder = generateMidAndDoneFinder();
+    private Map<Pair<String, String>, TriFunction<String, Boolean, Pageable, Page<ToDo>>> generateMidAndDoneFinder() {
+        Map<Pair<String, String>, TriFunction<String, Boolean, Pageable, Page<ToDo>>> map = new HashMap<>();
+        map.put(Pair.of("seq", "asc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderBySeqAsc(mid, done, pageable));
+        map.put(Pair.of("seq", "desc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderBySeqDesc(mid, done, pageable));
+        map.put(Pair.of("title", "asc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByTitleAsc(mid, done, pageable));
+        map.put(Pair.of("title", "desc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByTitleDesc(mid, done, pageable));
+        map.put(Pair.of("created_at", "asc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByCreatedAtAsc(mid, done, pageable));
+        map.put(Pair.of("created_at", "desc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByCreatedAtDesc(mid, done, pageable));
+        map.put(Pair.of("done_at", "asc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByDoneAtAsc(mid, done, pageable));
+        map.put(Pair.of("done_at", "desc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByDoneAtDesc(mid, done, pageable));
+        map.put(Pair.of("due_at", "asc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByDueAtAsc(mid, done, pageable));
+        map.put(Pair.of("due_at", "desc"), (mid, done, pageable) -> tRepo.findByMidAndDoneOrderByDueAtDesc(mid, done, pageable));
         return map;
     }
 
@@ -91,20 +103,20 @@ public class ToDoService {
      * 全員のToDoリストを取得する (R)
      * @return
      */
-    public List<ToDo> getToDoList(String sortBy, String order) {
-        Function<Boolean, List<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
-                (doneFlag) -> tRepo.findByDone(doneFlag));
-        return finder.apply(false);
+    public Page<ToDo> getToDoList(String sortBy, String order, Pageable pageable) {
+        BiFunction<Boolean, Pageable, Page<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
+                (doneFlag, pageable2) -> tRepo.findByDone(doneFlag, pageable2));
+        return finder.apply(false, pageable);
     }
 
     /**
      * 全員のDoneリストを取得する (R)
      * @return
      */
-    public List<ToDo> getDoneList(String sortBy, String order) {
-        Function<Boolean, List<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
-                (doneFlag) -> tRepo.findByDone(doneFlag));
-        return finder.apply(true);
+    public Page<ToDo> getDoneList(String sortBy, String order, Pageable pageable) {
+        BiFunction<Boolean, Pageable, Page<ToDo>> finder = doneFinder.getOrDefault(Pair.of(sortBy, order),
+                (doneFlag, pageable2) -> tRepo.findByDone(doneFlag, pageable2));
+        return finder.apply(true, pageable);
     }
 
     /**
@@ -119,7 +131,7 @@ public class ToDoService {
             throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION, mid
                     + ": Cannot done other's todo of " + todo.getMid());
         }
-        if(due != null && due.before(todo.getCreatedAt())) {
+        if (due != null && due.before(todo.getCreatedAt())) {
             throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION,
                     due + ": should be after created at.");
         }
@@ -127,21 +139,21 @@ public class ToDoService {
         return tRepo.save(todo);
     }
 
-    private final Map<Pair<String, String>, Function<Boolean, List<ToDo>>> doneFinder = generateDoneFinder();
-    private Map<Pair<String, String>, Function<Boolean, List<ToDo>>> generateDoneFinder() {
-        Map<Pair<String, String>, Function<Boolean, List<ToDo>>> map = new HashMap<>();
-        map.put(Pair.of("seq", "asc"), (doneFlag) -> tRepo.findByDoneOrderBySeqAsc(doneFlag));
-        map.put(Pair.of("seq", "desc"), (doneFlag) -> tRepo.findByDoneOrderBySeqDesc(doneFlag));
-        map.put(Pair.of("title", "asc"), (doneFlag) -> tRepo.findByDoneOrderByTitleAsc(doneFlag));
-        map.put(Pair.of("title", "desc"), (doneFlag) -> tRepo.findByDoneOrderByTitleDesc(doneFlag));
-        map.put(Pair.of("mid", "asc"), (doneFlag) -> tRepo.findByDoneOrderByMidAsc(doneFlag));
-        map.put(Pair.of("mid", "desc"), (doneFlag) -> tRepo.findByDoneOrderByMidDesc(doneFlag));
-        map.put(Pair.of("created_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByCreatedAtAsc(doneFlag));
-        map.put(Pair.of("created_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByCreatedAtDesc(doneFlag));
-        map.put(Pair.of("done_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtAsc(doneFlag));
-        map.put(Pair.of("done_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtDesc(doneFlag));
-        map.put(Pair.of("due_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByDueAtAsc(doneFlag));
-        map.put(Pair.of("due_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByDueAtDesc(doneFlag));
+    private final Map<Pair<String, String>, BiFunction<Boolean, Pageable, Page<ToDo>>> doneFinder = generateDoneFinder();
+    private Map<Pair<String, String>, BiFunction<Boolean, Pageable, Page<ToDo>>> generateDoneFinder() {
+        Map<Pair<String, String>, BiFunction<Boolean, Pageable, Page<ToDo>>> map = new HashMap<>();
+        map.put(Pair.of("seq", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderBySeqAsc(doneFlag, pageable));
+        map.put(Pair.of("seq", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderBySeqDesc(doneFlag, pageable));
+        map.put(Pair.of("title", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByTitleAsc(doneFlag, pageable));
+        map.put(Pair.of("title", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByTitleDesc(doneFlag, pageable));
+        map.put(Pair.of("mid", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByMidAsc(doneFlag, pageable));
+        map.put(Pair.of("mid", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByMidDesc(doneFlag, pageable));
+        map.put(Pair.of("created_at", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByCreatedAtAsc(doneFlag, pageable));
+        map.put(Pair.of("created_at", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByCreatedAtDesc(doneFlag, pageable));
+        map.put(Pair.of("done_at", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByDoneAtAsc(doneFlag, pageable));
+        map.put(Pair.of("done_at", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByDoneAtDesc(doneFlag, pageable));
+        map.put(Pair.of("due_at", "asc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByDueAtAsc(doneFlag, pageable));
+        map.put(Pair.of("due_at", "desc"), (doneFlag, pageable) -> tRepo.findByDoneOrderByDueAtDesc(doneFlag, pageable));
         return map;
     }
 

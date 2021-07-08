@@ -4,6 +4,8 @@ import java.util.List;
 import java.util.Objects;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.validation.BindingResult;
@@ -55,7 +57,8 @@ public class ToDoController {
     String showToDoList(@PathVariable String mid,
                         @RequestParam(name="sort_by", required = false) String sortBy,
                         @RequestParam(name="order", required = false) String order,
-                        @ModelAttribute(name = "ToDoForm") ToDoForm form, Model model) {
+                        @ModelAttribute(name = "ToDoForm") ToDoForm form, Model model,
+                        Pageable pageable) {
         Member m = mService.getMember(mid);
         // デフォルト値を入れておく．
         sortBy = getDefault(sortBy, "seq");
@@ -63,9 +66,9 @@ public class ToDoController {
 
         model.addAttribute("member", m);
         model.addAttribute("ToDoForm", form);
-        List<ToDo> todos = tService.getToDoList(mid, sortBy, order);
+        Page<ToDo> todos = tService.getToDoList(mid, sortBy, order, pageable);
         model.addAttribute("todos", todos);
-        List<ToDo> dones = tService.getDoneList(mid, sortBy, order);
+        Page<ToDo> dones = tService.getDoneList(mid, sortBy, order, pageable);
         model.addAttribute("dones", dones);
         return "list";
     }
@@ -84,15 +87,15 @@ public class ToDoController {
     String showAllToDoList(@PathVariable String mid,
                            @RequestParam(name="sort_by", required = false) String sortBy,
                            @RequestParam(name="order", required = false) String order,
-                           Model model) {
+                           Model model, Pageable pageable) {
         Member m = mService.getMember(mid);
         // デフォルト値を入れておく．
         sortBy = getDefault(sortBy, "seq");
         order = getDefault(order, "asc");
         model.addAttribute("member", m);
-        List<ToDo> todos = tService.getToDoList(sortBy, order);
+        Page<ToDo> todos = tService.getToDoList(sortBy, order, pageable);
         model.addAttribute("todos", todos);
-        List<ToDo> dones = tService.getDoneList(sortBy, order);
+        Page<ToDo> dones = tService.getDoneList(sortBy, order, pageable);
         model.addAttribute("dones", dones);
         return "alllist";
     }
@@ -103,10 +106,9 @@ public class ToDoController {
     @PostMapping("/{mid}/todos")
     String createToDo(@PathVariable String mid, @Validated @ModelAttribute(name = "ToDoForm") ToDoForm form,
             BindingResult bindingResult, Model model) {
-        if (bindingResult.hasErrors()) {
-            return showToDoList(mid, "seq", "asc", form, model);
+        if (!bindingResult.hasErrors()) {
+            tService.createToDo(mid, form);
         }
-        tService.createToDo(mid, form);
         return "redirect:/" + mid + "/todos";
     }
 
