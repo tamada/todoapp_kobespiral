@@ -25,6 +25,8 @@ public interface ToDoRepository extends CrudRepository<ToDo, Long> {
     List<ToDo> findByDoneOrderByCreatedAtDesc(boolean done);
     List<ToDo> findByDoneOrderByDoneAtAsc(boolean done);
     List<ToDo> findByDoneOrderByDoneAtDesc(boolean done);
+    List<ToDo> findByDoneOrderByDueAtAsc(boolean done);
+    List<ToDo> findByDoneOrderByDueAtDesc(boolean done);
 
     List<ToDo> findByMidAndDoneOrderBySeqAsc(String mid, boolean done);
     List<ToDo> findByMidAndDoneOrderBySeqDesc(String mid, boolean done);
@@ -34,5 +36,6 @@ public interface ToDoRepository extends CrudRepository<ToDo, Long> {
     List<ToDo> findByMidAndDoneOrderByCreatedAtDesc(String mid, boolean done);
     List<ToDo> findByMidAndDoneOrderByDoneAtAsc(String mid, boolean done);
     List<ToDo> findByMidAndDoneOrderByDoneAtDesc(String mid, boolean done);
-
+    List<ToDo> findByMidAndDoneOrderByDueAtAsc(String mid, boolean done);
+    List<ToDo> findByMidAndDoneOrderByDueAtDesc(String mid, boolean done);
 }

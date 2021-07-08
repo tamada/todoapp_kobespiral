@@ -40,8 +40,8 @@
         <tr th:each="todo: ${todos}">
             <td th:style="'background-color: ' + ${todo.background}">[[${todo.seq}]]</td>
             <td>[[${todo.title}]]</td>
-            <td>[[${todo.createdAt}]]</td>
-            <td>[[${todo.dueAt}]]</td>
+            <td th:title="${todo.createdAt}">[[${todo.humanizeCreatedAt()}]]</td>
+            <td th:title="${todo.dueAt}">[[${todo.humanizeDueAt()}]]</td>
             <td>
                 <form th:action="@{/{mid}/todos/{seq}/due(mid=${member.mid},seq=${todo.seq})}" th:method="put" th:object="${ToDoForm}">
                     <input type="hidden" name="title" th:value="${todo.title}" />
@@ -92,17 +92,23 @@
                 <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'created_at'}, order=${'desc'})}">↑</a>
             </th>
             <th>
+                期日
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'asc'})}">↓</a>
+                <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'due_at'}, order=${'desc'})}">↑</a>
+            </th>
+            <th>
                 完了日時
                 <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'done_at'}, order=${'asc'})}">↓</a>
                 <a th:href="@{/{mid}/todos(mid=${member.mid}, sort_by=${'done_at'}, order=${'desc'})}">↑</a>
             </th>
+            <th>コマンド</th>
         </tr>
         <tr th:each="done: ${dones}">
             <td th:style="'background-color: ' + ${done.background}">[[${done.seq}]]</td>
             <td>[[${done.title}]]</td>
-            <td>[[${done.createdAt}]]</td>
-            <td>[[${done.dueAt}]]</td>
-            <td>[[${done.doneAt}]]</td>
+            <td th:title="${done.createdAt}">[[${done.humanizeCreatedAt()}]]</td>
+            <td th:title="${done.dueAt}">[[${done.humanizeDueAt()}]]</td>
+            <td th:title="${done.doneAt}">[[${done.humanizeDoneAt()}]]</td>
             <td><a th:href="@{/{mid}/todos/{seq}/cancel(mid=${member.mid},seq=${done.seq})}">キャンセル</a></td>
         </tr>
     </table>

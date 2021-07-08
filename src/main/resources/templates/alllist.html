@@ -45,8 +45,8 @@
             <td th:style="'background-color: ' + ${todo.background}">[[${todo.seq}]]</td>
             <td>[[${todo.title}]]</td>
             <td>[[${todo.mid}]]</td>
-            <td>[[${todo.createdAt}]]</td>
-            <td>[[${todo.dueAt}]]</td>
+            <td th:title="${todo.createdAt}">[[${todo.humanizeCreatedAt()}]]</td>
+            <td th:title="${todo.dueAt}">[[${todo.humanizeDueAt()}]]</td>
         </tr>
     </table>
 
@@ -83,8 +83,8 @@
             <td th:style="'background-color: ' + ${done.background}">[[${done.seq}]]</td>
             <td>[[${done.title}]]</td>
             <td>[[${done.mid}]]</td>
-            <td>[[${todo.dueAt}]]</td>
-            <td>[[${done.doneAt}]]</td>
+            <td th:title="${done.dueAt}">[[${done.humanizeDueAt()}]]</td>
+            <td th:title="${done.doneAt}">[[${done.humanizeDoneAt()}]]</td>
         </tr>
     </table>
 

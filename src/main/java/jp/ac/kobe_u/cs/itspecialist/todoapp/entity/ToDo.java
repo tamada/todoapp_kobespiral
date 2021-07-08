@@ -11,7 +11,7 @@ import javax.persistence.Id;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import jp.ac.kobe_u.cs.itspecialist.todoapp.dto.ToDoForm;
+import humanize.Humanize;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -34,6 +34,7 @@ public class ToDo {
     Date createdAt;   //作成日時
     @Temporal(TemporalType.TIMESTAMP)
     Date doneAt;      //完了日時
+
     @Temporal(TemporalType.TIMESTAMP)
     Date dueAt;       //期限
     String background; //背景色
@@ -52,9 +53,27 @@ public class ToDo {
     private static final DateFormat FORMATTER = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
 
     public String getDueString() {
-        if(dueAt == null) {
+        if (dueAt == null) {
             return "";
         }
         return FORMATTER.format(dueAt);
+    }
+
+    public String humanizeCreatedAt() {
+        return Humanize.naturalDay(createdAt);
+    }
+
+    public String humanizeDueAt() {
+        if(dueAt == null) {
+            return "";
+        }
+        return Humanize.naturalDay(dueAt);
+    }
+
+    public String humanizeDoneAt() {
+        if(doneAt == null) {
+            return "";
+        }
+        return Humanize.naturalDay(doneAt);
     }
 }

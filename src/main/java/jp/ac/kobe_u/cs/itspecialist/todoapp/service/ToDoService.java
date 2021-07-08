@@ -82,6 +82,8 @@ public class ToDoService {
         map.put(Pair.of("created_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByCreatedAtDesc(mid, done));
         map.put(Pair.of("done_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtAsc(mid, done));
         map.put(Pair.of("done_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDoneAtDesc(mid, done));
+        map.put(Pair.of("due_at", "asc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDueAtAsc(mid, done));
+        map.put(Pair.of("due_at", "desc"), (mid, done) -> tRepo.findByMidAndDoneOrderByDueAtDesc(mid, done));
         return map;
     }
 
@@ -138,6 +140,8 @@ public class ToDoService {
         map.put(Pair.of("created_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByCreatedAtDesc(doneFlag));
         map.put(Pair.of("done_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtAsc(doneFlag));
         map.put(Pair.of("done_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByDoneAtDesc(doneFlag));
+        map.put(Pair.of("due_at", "asc"), (doneFlag) -> tRepo.findByDoneOrderByDueAtAsc(doneFlag));
+        map.put(Pair.of("due_at", "desc"), (doneFlag) -> tRepo.findByDoneOrderByDueAtDesc(doneFlag));
         return map;
     }
 
