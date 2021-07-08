@@ -18,13 +18,20 @@
             <th>#</th>
             <th>タイトル</th>
             <th>作成日時</th>
+            <th>期日</th>
             <th>コマンド</th>
         </tr>
         <tr th:each="todo: ${todos}">
             <td>[[${todo.seq}]]</td>
             <td>[[${todo.title}]]</td>
+            <td>[[${todo.dueAt}]]</td>
             <td>[[${todo.createdAt}]]</td>
             <td>
+                <form th:action="@{/{mid}/todos/{seq}/due(mid=${member.mid},seq=${todo.seq})}" th:method="put" th:object="${ToDoForm}">
+                    <input type="hidden" name="title" th:value="${todo.title}" />
+                    <input type="datetime-local" name="due" th:value="${todo.getDueString()}" />
+                    <input type="submit" value="期日を設定" />
+                </form>
                 <a th:href="@{/{mid}/todos/{seq}/done(mid=${member.mid},seq=${todo.seq})}">完了</a>
             </td>
         </tr>
@@ -32,9 +39,10 @@
             <td>
                 *
             </td>
-            <td colspan="3">
+            <td colspan="4">
                 <form role="form" th:action="@{/{mid}/todos(mid=${member.mid})}" th:object="${ToDoForm}" method="post">
                     <input type="text" required th:field="*{title}" />
+                    <input type="datetime-local" th:field="*{due}" />
                     <input type="submit" value="新規作成" />
                     <div th:if="${#fields.hasErrors('title')}" th:errors="*{title}" style="color: red"></div>
                 </form>
@@ -48,12 +56,14 @@
             <th>#</th>
             <th>タイトル</th>
             <th>作成日時</th>
+            <th>期日</th>
             <th>完了日時</th>
         </tr>
         <tr th:each="done: ${dones}">
             <td>[[${done.seq}]]</td>
             <td>[[${done.title}]]</td>
             <td>[[${done.createdAt}]]</td>
+            <td>[[${done.dueAt}]]</td>
             <td>[[${done.doneAt}]]</td>
         </tr>
     </table>
