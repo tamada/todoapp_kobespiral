@@ -24,12 +24,17 @@ public class ToDoForm {
     @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
     LocalDateTime due; // 期限
 
+    @NotBlank
+    @Size(min=6, max=8)
+    String background; // 背景色
+
     public ToDo toEntity() {
         ToDo t = new ToDo();
         t.setTitle(title);
         t.setCreatedAt(new Date());
         t.setDone(false);
         t.setDueAt(getDueDate());
+        t.setBackground(background);
         return t;
     }
 

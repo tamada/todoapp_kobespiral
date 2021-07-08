@@ -116,4 +116,14 @@ public class ToDoController {
         tService.cancel(mid, seq);
         return "redirect:/" + mid + "/todos";
     }
+
+    /*
+     * 背景色の更新．更新終了後，ユーザページへリダイレクト．
+     */
+    @PutMapping("/{mid}/todos/{seq}/background")
+    String updateBackground(@PathVariable String mid, @PathVariable Long seq,
+                            @Validated @ModelAttribute(name="ToDoForm") ToDoForm form, Model model) {
+        tService.updateBackground(mid, seq, form.getBackground());
+        return "redirect:/" + mid + "/todos";
+    }
 }

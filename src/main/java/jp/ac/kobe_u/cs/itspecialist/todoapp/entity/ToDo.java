@@ -36,6 +36,7 @@ public class ToDo {
     Date doneAt;      //完了日時
     @Temporal(TemporalType.TIMESTAMP)
     Date dueAt;       //期限
+    String background; //背景色
 
     public boolean isValidDueDate() {
         if (dueAt == null) { // dueが設定されていなければ無視する．
