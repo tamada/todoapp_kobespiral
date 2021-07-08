@@ -120,6 +120,24 @@ public class ToDoService {
     }
 
     /**
+     * ToDo の完了をキャンセルする．
+     * @param mid 完了者
+     * @param seq 完了をキャンセルするToDoの番号
+     * @return
+     */
+    public ToDo cancel(String mid, Long seq) {
+        ToDo todo = getToDo(seq);
+        // Doneの認可を確認する．他人のToDoを閉めたらダメ．
+        if (!mid.equals(todo.getMid())) {
+            throw new ToDoAppException(ToDoAppException.INVALID_TODO_OPERATION,
+                    mid + ": Cannot cancel other's todo of " + todo.getMid());
+        }
+        todo.setDone(false);
+        todo.setDoneAt(null);
+        return tRepo.save(todo);
+    }
+
+    /**
      * ToDoを更新する
      * @param mid 更新者
      * @param seq 更新するToDo番号

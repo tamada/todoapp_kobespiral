@@ -58,6 +58,7 @@
             <th>作成日時</th>
             <th>期日</th>
             <th>完了日時</th>
+            <th>コマンド</th>
         </tr>
         <tr th:each="done: ${dones}">
             <td>[[${done.seq}]]</td>
@@ -65,6 +66,7 @@
             <td>[[${done.createdAt}]]</td>
             <td>[[${done.dueAt}]]</td>
             <td>[[${done.doneAt}]]</td>
+            <td><a th:href="@{/{mid}/todos/{seq}/cancel(mid=${member.mid},seq=${done.seq})}">キャンセル</a></td>
         </tr>
     </table>
 
