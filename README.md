@@ -31,6 +31,21 @@ mysql> grant all on todoapp.* to todouser;
 - ToDoV1.war を手元のPCの tomcatの webappsにコピー
 - ブラウザから，http://localhost:8080/ToDoV1/ にアクセス
 
+### :whale: `docker-compose`での実行
+
+ * 起動
+     * `docker-compose up -d`
+         * `-d` を付けるとバックグラウンドで実行．
+         * `docker-compose logs -f` でバックグラウンドで出力されるログを確認できる．
+ * 終了
+     * `docker-compose stop` で終了．
+     * `docker-compose down` でコンテナも削除する．
+ * `docker-compose` で起動している `mysql` に接続する．
+     * `mysql -u todouser -p -h 127.0.0.1 -P 13306` もしくは
+     * `docker exec -it todo_mysql bash` でコンテナに接続し，
+         * `todo_mysql` というコンテナ上で `bash` を起動する（`-it`はインタラクティブモード）．
+     * その後，`bash`上で `mysql -u todouser -p` で接続する．
+
 ## 設計
 
 - メンバー，および，ToDo項目をCRUDする典型的なアプリケーション
