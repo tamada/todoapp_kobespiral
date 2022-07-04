@@ -7,13 +7,8 @@ on:
 
 jobs:
   build:
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os:
-          - ubuntu-latest
-          - macos-latest
-          - windows-latest
+    runs-on: ubuntu-latest
+
     services:
       mysql:
         image: mysql:8.0
@@ -32,9 +27,6 @@ jobs:
           --health-retries 5
 
     steps:
-      - uses: docker-practice/actions-setup-docker@master
-        if: ${{ matrix.os == 'macos-latest' }}
-
       - name: Checkout repository
         uses: actions/checkout@v3
 
